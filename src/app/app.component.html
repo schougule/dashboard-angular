@@ -1,0 +1,80 @@
+<div style="display:flex">
+<div class="shadowbox">
+<table class="table" >
+  <thead class="thead-dark">
+    <tr>
+      <th scope="col">EOD_flow</th>
+      <th scope="col">Calendar</th>
+      <th scope="col">Ofsset</th>
+      <th scope="col">File_set_cd</th>
+      <th scope="col">Draft</th>
+
+      <th scope="col">VLDAT</th>
+      <th scope="col">Unhappy</th>
+      <th scope="col">OFSAA</th>
+      
+    </tr>
+  </thead>
+ 
+    <tr *ngFor="let d of parentData;let i=index">
+      <td>
+        {{i}} {{ d.EOD_flow }}
+      </td>
+      <td>
+        {{ d.Calendar }}
+      </td>
+      <td>
+        {{ d.Ofsset }}
+      </td>
+      <td>
+         {{ d.File_set_cd }}
+      </td>
+      <td>
+        {{ d.Draft }}
+      </td>
+      <td [ngClass]="{'bg-warning':d.VLDAT | dateValidation,
+      'bg-success':d.VLDAT !== 'NA'}">
+       {{ d.VLDAT }}
+      </td>
+      <td [ngClass]="{'bg-warning':d.Unhappy| dateValidation,
+      'bg-success':d.Unhappy !== 'NA'}">
+            {{ d.Unhappy }}
+           
+      </td>
+      <td [ngClass]="{'bg-warning':d.OFSAA | dateValidation,
+      'bg-success':d.OFSAA !== 'NA'}">
+               {{ d.OFSAA }}
+      </td>
+
+      <td>
+    </tr>
+    <tr>
+      <td scope="col" colspan="5"></td>
+     
+
+      <td scope="col">{{vlDatData|calculatePercent}}%</td>
+      <td scope="col">{{unhappyData|calculatePercent}}%</td>
+      <td scope="col">{{ofssaData|calculatePercent}}%</td>
+      
+    </tr>
+  </table>
+</div>
+<div>
+  <h3>VLDAT</h3>
+  <canvas baseChart width="300" height="300"
+  [data]="vlDatData | pieData"
+  [labels]="['Completed for Today', 'Yet to be Completed']"
+          [chartType]="pieChartType"
+          [options]="options"
+          (chartHover)="chartHovered($event)"
+          (chartClick)="chartClicked($event)"></canvas>
+
+  <canvas baseChart width="300" height="300"
+  [data]="unhappyData | pieData"
+          [labels]="['Completed for Today', 'Yet to be Completed']"
+          [chartType]="pieChartType"
+          [options]="options"
+          (chartHover)="chartHovered($event)"
+          (chartClick)="chartClicked($event)"></canvas>
+
+<div>
