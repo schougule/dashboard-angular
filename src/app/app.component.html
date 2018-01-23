@@ -1,6 +1,6 @@
 <div style="display:flex">
 <div class="shadowbox">
-<table class="table" >
+<table class="table table-bordered" >
   <thead class="thead-dark">
     <tr>
       <th scope="col">EOD_flow</th>
@@ -18,7 +18,7 @@
  
     <tr *ngFor="let d of parentData;let i=index">
       <td>
-        {{i}} {{ d.EOD_flow }}
+       {{ d.EOD_flow }}
       </td>
       <td>
         {{ d.Calendar }}
@@ -32,21 +32,24 @@
       <td>
         {{ d.Draft }}
       </td>
-      <td [ngClass]="{'bg-warning':d.VLDAT | dateValidation,
-      'bg-success':d.VLDAT !== 'NA'}">
-       {{ d.VLDAT }}
+      <td [ngClass]="{'bg-warning':(d.VLDAT | dateValidation)===1,
+      'bg-success':(d.VLDAT | dateValidation)===2,
+      'bg-danger':(d.VLDAT | dateValidation)===3}">
+       {{ d.VLDAT |date:'dd-MM-yyyy' }}
       </td>
-      <td [ngClass]="{'bg-warning':d.Unhappy| dateValidation,
-      'bg-success':d.Unhappy !== 'NA'}">
-            {{ d.Unhappy }}
+      <td [ngClass]="{'bg-warning':(d.Unhappy | dateValidation)===1,
+      'bg-success':(d.Unhappy | dateValidation)===2,
+      'bg-danger':(d.Unhappy | dateValidation)===3}">
+            {{ d.Unhappy | date:'dd-MM-yyyy' }}
            
       </td>
-      <td [ngClass]="{'bg-warning':d.OFSAA | dateValidation,
-      'bg-success':d.OFSAA !== 'NA'}">
-               {{ d.OFSAA }}
+      <td [ngClass]="{'bg-warning':(d.OFSAA | dateValidation)===1,
+      'bg-success':(d.OFSAA | dateValidation)===2,
+      'bg-danger':(d.OFSAA | dateValidation)===3}">
+               {{ d.OFSAA | date:'dd-MM-yyyy' }}
       </td>
 
-      <td>
+      
     </tr>
     <tr>
       <td scope="col" colspan="5"></td>
@@ -69,6 +72,7 @@
           (chartHover)="chartHovered($event)"
           (chartClick)="chartClicked($event)"></canvas>
 
+          <h3>Unhappy</h3>
   <canvas baseChart width="300" height="300"
   [data]="unhappyData | pieData"
           [labels]="['Completed for Today', 'Yet to be Completed']"
@@ -78,3 +82,14 @@
           (chartClick)="chartClicked($event)"></canvas>
 
 <div>
+
+    <h3>Ofssa</h3>
+    <canvas baseChart width="300" height="300"
+    [data]="ofssaData | pieData"
+            [labels]="['Completed for Today', 'Yet to be Completed']"
+            [chartType]="pieChartType"
+            [options]="options"
+            (chartHover)="chartHovered($event)"
+            (chartClick)="chartClicked($event)"></canvas>
+  
+  <div>
