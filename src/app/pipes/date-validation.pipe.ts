@@ -5,7 +5,7 @@ import { differenceInCalendarDays, format, parse } from 'date-fns';
   name: 'dateValidation'
 })
 export class DateValidationPipe implements PipeTransform {
-  transform(date: string): boolean {
+  transform(date: string): number {
     var d1 = new Date();
   console.log("date" +date)
     var d3 = new Date(date);
@@ -13,11 +13,11 @@ export class DateValidationPipe implements PipeTransform {
     console.log("dateValidation" + result);
     if (isNaN(result)) {
       console.log("isNAN");
-      return false;
+      return 1;
     }
     if (result ==0) {
-      return true;
+      return 2;
     }
-    return false;
+    return 3;
   }
 }
