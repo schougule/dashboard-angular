@@ -1,95 +1,138 @@
-<div style="display:flex">
-<div class="shadowbox">
-<table class="table table-bordered" >
-  <thead class="thead-dark">
-    <tr>
-      <th scope="col">EOD_flow</th>
-      <th scope="col">Calendar</th>
-      <th scope="col">Ofsset</th>
-      <th scope="col">File_set_cd</th>
-      <th scope="col">Draft</th>
+import { Component, ChangeDetectorRef } from '@angular/core';
+import {Observable} from 'rxjs/Rx';
+import { DbServiceService } from './service/db-service.service';
+import { differenceInCalendarDays, format } from 'date-fns'
+import { nextTick } from 'q';
+import { forkJoin } from 'rxjs/observable/forkJoin';
 
-      <th scope="col">VLDAT</th>
-      <th scope="col">Unhappy</th>
-      <th scope="col">OFSAA</th>
-      
-    </tr>
-  </thead>
+@Component({
+  selector: 'app-root',
+  styleUrls: ['./app.component.css'],
+  templateUrl: './app.component.html',
+})
+export class AppComponent {
+
+
+  parentData: Array<DashboardDTO>=[];
+  vlDatData: Array<FlowDTO>=[];
+  unhappyData: Array<FlowDTO>=[];
+  ofssaData: Array<FlowDTO>=[];
+  
+
+  private datasets = [
+    {
+      data:  [100],
+      borderWidth:[0]
+    }
+  ];
+
+  public pieChartLabels = ['VLDAT']
+   public pieChartType:string = 'pie';
+  
  
-    <tr *ngFor="let d of parentData;let i=index">
-      <td>
-       {{ d.EOD_flow }}
-      </td>
-      <td>
-        {{ d.Calendar }}
-      </td>
-      <td>
-        {{ d.Ofsset }}
-      </td>
-      <td>
-         {{ d.File_set_cd }}
-      </td>
-      <td>
-        {{ d.Draft }}
-      </td>
-      <td [ngClass]="{'bg-warning':(d.VLDAT | dateValidation)===1,
-      'bg-success':(d.VLDAT | dateValidation)===2,
-      'bg-danger':(d.VLDAT | dateValidation)===3}">
-       {{ d.VLDAT |date:'dd-MM-yyyy' }}
-      </td>
-      <td [ngClass]="{'bg-warning':(d.Unhappy | dateValidation)===1,
-      'bg-success':(d.Unhappy | dateValidation)===2,
-      'bg-danger':(d.Unhappy | dateValidation)===3}">
-            {{ d.Unhappy | date:'dd-MM-yyyy' }}
-           
-      </td>
-      <td [ngClass]="{'bg-warning':(d.OFSAA | dateValidation)===1,
-      'bg-success':(d.OFSAA | dateValidation)===2,
-      'bg-danger':(d.OFSAA | dateValidation)===3}">
-               {{ d.OFSAA | date:'dd-MM-yyyy' }}
-      </td>
+  // events
+  public chartClicked(e:any):void {
+    console.log(e);
+  }
+ 
+  public chartHovered(e:any):void {
 
-      
-    </tr>
-    <tr>
-      <td scope="col" colspan="5"></td>
+    
+    console.log(e);
+  }
+
+  constructor(private service: DbServiceService) {}
+
+    
+    
+    
+  ngAfterViewInit(){
+   var ofssDateObservable =this.service.getOfssaDetails();
      
 
-      <td scope="col">{{vlDatData|calculatePercent}}%</td>
-      <td scope="col">{{unhappyData|calculatePercent}}%</td>
-      <td scope="col">{{ofssaData|calculatePercent}}%</td>
+   var unhappyObservable =this.service.getUnhappyDetails();
+     
+
+     var vldatObservable= this.service.getVldatDetails();
+     
+     var parentObservale= this.service.getParentDetails();
+    
+
+
+     forkJoin(unhappyObservable,
+       
+       ofssDateObservable,
+       vldatObservable,
+       parentObservale)
+       .subscribe(([res1, res2, res3,res4]) => {
+
+        this.vlDatData =res3;
+        this.unhappyData=res1;
+        this.ofssaData=res2;
+        this.parentData=res4;
+
+        for(var i=0;i<this.parentData.length;i++){
+          
+          this.parentData[i].VLDAT=this.vlDatData[i].DATE;
+       this.parentData[i].Unhappy=this.unhappyData[i].DATE;
+          this.parentData[i].OFSAA=this.ofssaData[i].DATE;
+          }
       
-    </tr>
-  </table>
-</div>
-<div>
-  <h3>VLDAT</h3>
-  <canvas baseChart width="300" height="300"
-  [data]="vlDatData | pieData"
-  [labels]="['Completed for Today', 'Yet to be Completed']"
-          [chartType]="pieChartType"
-          [options]="options"
-          (chartHover)="chartHovered($event)"
-          (chartClick)="chartClicked($event)"></canvas>
+     
+    });
 
-          <h3>Unhappy</h3>
-  <canvas baseChart width="300" height="300"
-  [data]="unhappyData | pieData"
-          [labels]="['Completed for Today', 'Yet to be Completed']"
-          [chartType]="pieChartType"
-          [options]="options"
-          (chartHover)="chartHovered($event)"
-          (chartClick)="chartClicked($event)"></canvas>
+    //  this.service.getParentDetails().subscribe({
+    //   next : (value) =>{
+    //       this.parentData=value;
+    //       console.log("lenghth" +this.parentData.length +this.vlDatData.length);
+    //       for(var i=0;i<this.parentData.length;i++){
+            
+    //         this.parentData[i].VLDAT=this.vlDatData[i].DATE;
+		// 	   this.parentData[i].Unhappy=this.unhappyData[i].DATE;
+		// 	      this.parentData[i].OFSAA=this.ofssaData[i].DATE;
+    //         }
+    //         }
+        
+    //  }
+    //  )
+   
 
-<div>
+   
 
-    <h3>Ofssa</h3>
-    <canvas baseChart width="300" height="300"
-    [data]="ofssaData | pieData"
-            [labels]="['Completed for Today', 'Yet to be Completed']"
-            [chartType]="pieChartType"
-            [options]="options"
-            (chartHover)="chartHovered($event)"
-            (chartClick)="chartClicked($event)"></canvas>
+  }
+  }
   
-  <div>
+
+
+export class DashboardDTO {
+
+  EOD_flow: string;
+  Calendar: string;
+  WD_Ofsset: string;
+  CD_Ofsset: string;
+  File_set_cd: number;
+  Draft: string;
+  VLDAT: string;
+  Unhappy: string;
+  OFSAA: string;
+
+
+}
+
+
+export class FlowDTO {
+  
+    ORDO: number;
+    DESCR: string;
+    FLOW_ID: number;
+    AREA: number;
+    DATE: string;
+      
+  }
+
+
+
+
+  
+  
+  
