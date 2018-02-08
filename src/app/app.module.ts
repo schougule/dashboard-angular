@@ -9,17 +9,23 @@ import { ChartsModule } from 'ng2-charts/ng2-charts';
 import { CalculatePercentPipe } from './pipes/calculate-percent.pipe';
 import { DateValidationPipe } from './pipes/date-validation.pipe';
 import { PieDataPipe } from './pipes/pie-data.pipe';
+import { DateHighlighterDirective } from './directives/date-highlighter.directive';
 
 
 
 @NgModule({
-  declarations: [AppComponent,DateValidationPipe, CalculatePercentPipe, PieDataPipe],
+  declarations: [
+    AppComponent,DateValidationPipe, 
+    CalculatePercentPipe, 
+    PieDataPipe,
+    DateHighlighterDirective],
   imports: [  
     BrowserModule,
     BrowserAnimationsModule,
     FormsModule,
     HttpClientModule,
-    ChartsModule
+    ChartsModule,
+    
 
   ],
   bootstrap: [AppComponent],
