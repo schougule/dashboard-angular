@@ -1,138 +1,93 @@
-import { Component, ChangeDetectorRef } from '@angular/core';
-import {Observable} from 'rxjs/Rx';
-import { DbServiceService } from './service/db-service.service';
-import { differenceInCalendarDays, format } from 'date-fns'
-import { nextTick } from 'q';
-import { forkJoin } from 'rxjs/observable/forkJoin';
+<div style="display:flex">
+<div class="shadowbox">
+<table class="table table-bordered" >
+  <thead class="thead-dark">
+    <tr>
+      <th scope="col">EOD_flow</th>
+      <th scope="col">Calendar</th>
+      <th scope="col">WD Ofsset</th>
+      <th scope="col">CD Ofsset</th>
+      <th scope="col">File_set_cd</th>
+      <th scope="col">Draft</th>
 
-@Component({
-  selector: 'app-root',
-  styleUrls: ['./app.component.css'],
-  templateUrl: './app.component.html',
-})
-export class AppComponent {
-
-
-  parentData: Array<DashboardDTO>=[];
-  vlDatData: Array<FlowDTO>=[];
-  unhappyData: Array<FlowDTO>=[];
-  ofssaData: Array<FlowDTO>=[];
-  
-
-  private datasets = [
-    {
-      data:  [100],
-      borderWidth:[0]
-    }
-  ];
-
-  public pieChartLabels = ['VLDAT']
-   public pieChartType:string = 'pie';
-  
- 
-  // events
-  public chartClicked(e:any):void {
-    console.log(e);
-  }
- 
-  public chartHovered(e:any):void {
-
-    
-    console.log(e);
-  }
-
-  constructor(private service: DbServiceService) {}
-
-    
-    
-    
-  ngAfterViewInit(){
-   var ofssDateObservable =this.service.getOfssaDetails();
-     
-
-   var unhappyObservable =this.service.getUnhappyDetails();
-     
-
-     var vldatObservable= this.service.getVldatDetails();
-     
-     var parentObservale= this.service.getParentDetails();
-    
-
-
-     forkJoin(unhappyObservable,
-       
-       ofssDateObservable,
-       vldatObservable,
-       parentObservale)
-       .subscribe(([res1, res2, res3,res4]) => {
-
-        this.vlDatData =res3;
-        this.unhappyData=res1;
-        this.ofssaData=res2;
-        this.parentData=res4;
-
-        for(var i=0;i<this.parentData.length;i++){
-          
-          this.parentData[i].VLDAT=this.vlDatData[i].DATE;
-       this.parentData[i].Unhappy=this.unhappyData[i].DATE;
-          this.parentData[i].OFSAA=this.ofssaData[i].DATE;
-          }
+      <th scope="col">VLDAT</th>
+      <th scope="col">Unhappy</th>
+      <th scope="col">OFSAA</th>
       
-     
-    });
+    </tr>
+  </thead>
+ 
+    <tr *ngFor="let d of parentData;let i=index">
+      <td>
+       {{ d.EOD_flow }}
+      </td>
+      <td>
+        {{ d.Calendar }}
+      </td>
+      <td>
+        {{ d.WD_Ofsset }}
+      </td>
+      <td>
+        {{ d.CD_Ofsset }}
+      </td>
+      <td>
+         {{ d.File_set_cd }}
+      </td>
+      <td>
+        {{ d.Draft }}
+      </td>
+      <td [dateHighlighter]="d.VLDAT"[wdOffset]="d.WD_Ofsset" [cdOffset]="d.CD_Ofsset">
+       {{ d.VLDAT |date:'dd-MM-yyyy' }}
+      </td>
+      <td [dateHighlighter]="d.Unhappy" [wdOffset]="d.WD_Ofsset" [cdOffset]="d.CD_Ofsset">
+            {{ d.Unhappy | date:'dd-MM-yyyy' }}
+           
+      </td>
+      <td [dateHighlighter]="d.OFSAA" [wdOffset]="d.WD_Ofsset" [cdOffset]="d.CD_Ofsset">
+               {{ d.OFSAA | date:'dd-MM-yyyy' }}
+      </td>
 
-    //  this.service.getParentDetails().subscribe({
-    //   next : (value) =>{
-    //       this.parentData=value;
-    //       console.log("lenghth" +this.parentData.length +this.vlDatData.length);
-    //       for(var i=0;i<this.parentData.length;i++){
-            
-    //         this.parentData[i].VLDAT=this.vlDatData[i].DATE;
-		// 	   this.parentData[i].Unhappy=this.unhappyData[i].DATE;
-		// 	      this.parentData[i].OFSAA=this.ofssaData[i].DATE;
-    //         }
-    //         }
-        
-    //  }
-    //  )
-   
-
-   
-
-  }
-  }
-  
-
-
-export class DashboardDTO {
-
-  EOD_flow: string;
-  Calendar: string;
-  WD_Ofsset: string;
-  CD_Ofsset: string;
-  File_set_cd: number;
-  Draft: string;
-  VLDAT: string;
-  Unhappy: string;
-  OFSAA: string;
-
-
-}
-
-
-export class FlowDTO {
-  
-    ORDO: number;
-    DESCR: string;
-    FLOW_ID: number;
-    AREA: number;
-    DATE: string;
       
-  }
+    </tr>
+    <tr>
+      <td scope="col" colspan="6"></td>
+     
 
+      <td scope="col">{{vlDatData|calculatePercent}}%</td>
+      <td scope="col">{{unhappyData|calculatePercent}}%</td>
+      <td scope="col">{{ofssaData|calculatePercent}}%</td>
+      
+    </tr>
+  </table>
+</div>
+<div>
+  <h3>VLDAT</h3>
+  <canvas baseChart width="300" height="300"
+  [data]="vlDatData | pieData"
+  [labels]="['Completed for Today', 'Yet to be Completed']"
+          [chartType]="pieChartType"
+          [options]="options"
+          (chartHover)="chartHovered($event)"
+          (chartClick)="chartClicked($event)"></canvas>
 
+          <h3>Unhappy</h3>
+  <canvas baseChart width="300" height="300"
+  [data]="unhappyData | pieData"
+          [labels]="['Completed for Today', 'Yet to be Completed']"
+          [chartType]="pieChartType"
+          [options]="options"
+          (chartHover)="chartHovered($event)"
+          (chartClick)="chartClicked($event)"></canvas>
 
+<div>
 
+    <h3>Ofssa</h3>
+    <canvas baseChart width="300" height="300"
+    [data]="ofssaData | pieData"
+            [labels]="['Completed for Today', 'Yet to be Completed']"
+            [chartType]="pieChartType"
+            [options]="options"
+            (chartHover)="chartHovered($event)"
+            (chartClick)="chartClicked($event)"></canvas>
   
-  
-  
+  <div>
